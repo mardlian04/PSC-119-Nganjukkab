@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+    mysql:
+        image: mysql:8.0
+        container_name: psc119_mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: psc119_db
+            MYSQL_USER: psc119_admin
+            MYSQL_PASSWORD: admin123
+        ports:
+            - "3309:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - psc119_network
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: psc119_phpmyadmin
+        restart: unless-stopped
+        ports:
+            - "8080:80"
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+        depends_on:
+            - mysql
+        networks:
+            - psc119_network
+
+volumes:
+    mysql_data:
+
+networks:
+    psc119_network:
