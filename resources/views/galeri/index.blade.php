@@ -1,129 +1,112 @@
 <x-front-layout>
     <x-slot name="title">Galeri | PSC 119 Kab. Nganjuk</x-slot>
 
-    <section
-        class="relative h-[40vh] md:h-[50vh] flex items-center justify-center text-center overflow-hidden bg-slate-900">
-        <div class="absolute inset-0 z-0">
-            <img src="{{ asset('bannerpsc.png') }}" class="w-full h-full object-cover opacity-40 scale-105"
-                alt="Background PSC">
-            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-900"></div>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-20">
+        <header class="mb-10 md:mb-16">
+            <nav
+                class="flex items-center gap-2 mb-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">
+                <a href="/" class="hover:text-red-600 transition-colors">Beranda</a>
+                <span class="text-slate-300">/</span>
+                <span class="text-slate-600">Galeri</span>
+            </nav>
 
-        <div class="relative z-10 px-6 max-w-4xl">
-            <span
-                class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest uppercase bg-red-600 text-white rounded-full">
-                Media & Informasi
-            </span>
-            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-white">
-                Galeri <span class="text-red-500">PSC 119</span>
-            </h1>
-            <p class="text-slate-300 max-w-2xl mx-auto text-base md:text-lg font-light leading-relaxed">
-                Dokumentasi kegiatan dan media edukasi kesehatan untuk masyarakat Kabupaten Nganjuk.
-            </p>
-        </div>
-    </section>
+            <div class="relative inline-block">
+                <h1 class="text-3xl md:text-3xl max-sm:text-xl font-black text-slate-900 tracking-tight">
+                    Galeri <span class="text-red-600">Kegiatan</span>
+                </h1>
+                <div class="mt-4 w-16 h-1.5 bg-red-600 rounded-full"></div>
+            </div>
+        </header>
 
-    <div class="max-w-7xl mx-auto px-6 py-20">
-        @if ($galleries->where('tipe_file', 'image')->count() > 0)
-            <section class="mb-24">
-                <div class="flex flex-col mb-10">
-                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Galeri Foto</h2>
-                    <div class="h-1 w-20 bg-red-600 mt-2"></div>
-                </div>
+        @if ($galleries->count() > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8 mb-16">
+                @foreach ($galleries as $g)
+                    <div class="group relative overflow-hidden rounded-xl bg-slate-100 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500"
+                        onclick="openModal('{{ asset('storage/' . $g->gambar) }}', '{{ $g->judul }}')">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
-                    @foreach ($galleries->where('tipe_file', 'image') as $g)
+                        <img src="{{ asset('storage/' . $g->gambar) }}"
+                            class="w-full h-[250px] md:h-[300px] object-cover transition-transform duration-700 group-hover:scale-110">
+
                         <div
-                            class="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100">
-                            <div class="relative aspect-[4/3] overflow-hidden cursor-pointer"
-                                onclick="openModal('{{ asset('storage/' . $g->path_file) }}', '{{ $g->judul_file }}')">
-                                <img src="{{ asset('storage/' . $g->path_file) }}"
-                                    class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out">
-
-                                <div
-                                    class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                    <div
-                                        class="p-4 bg-white/10 backdrop-blur-md rounded-full text-white transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="p-6">
-                                <h3
-                                    class="font-bold text-slate-800 text-lg mb-2 line-clamp-1 group-hover:text-red-600 transition-colors">
-                                    {{ $g->judul_file }}
-                                </h3>
-                                <p class="text-slate-500 text-sm line-clamp-2 font-light italic">
-                                    {{ $g->keterangan }}
-                                </p>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        @if ($galleries->where('tipe_file', 'pdf')->count() > 0)
-            <section>
-                <div class="flex flex-col mb-10">
-                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Dokumen Edukasi</h2>
-                    <div class="h-1 w-20 bg-red-600 mt-2"></div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    @foreach ($galleries->where('tipe_file', 'pdf') as $g)
-                        <div
-                            class="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-red-200 hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
-                            <div
-                                class="w-14 h-14 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-file-pdf text-2xl"></i>
-                            </div>
-
-                            <h3 class="font-bold text-slate-800 text-sm mb-2 line-clamp-2 min-h-[40px]">
-                                {{ $g->judul_file }}
+                            class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex flex-col justify-end p-6">
+                            <h3
+                                class="text-white text-lg md:text-xl font-bold translate-y-4 group-hover:translate-y-0 transition duration-500">
+                                {{ $g->judul }}
                             </h3>
-                            <p class="text-slate-400 text-xs mb-6 line-clamp-2">
-                                {{ $g->keterangan }}
-                            </p>
 
-                            <a href="{{ asset('storage/' . $g->path_file) }}" target="_blank"
-                                class="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
-                                <span>Unduh PDF</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                            </a>
+                            @if ($g->deskripsi)
+                                <p
+                                    class="text-white/80 text-sm mt-2 opacity-0 group-hover:opacity-100 transition duration-700 delay-100 line-clamp-2">
+                                    {{ $g->deskripsi }}
+                                </p>
+                            @endif
                         </div>
-                    @endforeach
-                </div>
-            </section>
-        @endif
+                    </div>
+                @endforeach
+            </div>
 
-        <div class="mt-20 flex justify-center">
-            <div class="px-4 py-2 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div class="mt-10 flex justify-center">
                 {{ $galleries->links() }}
             </div>
-        </div>
+        @else
+            <div class="relative flex items-center justify-center py-32 px-6 overflow-hidden">
+                <div
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-red-50 rounded-full blur-3xl opacity-60">
+                </div>
+
+                <div class="relative flex flex-col items-center max-w-lg w-full text-center">
+                    <div class="relative mb-10">
+                        <div class="absolute inset-0 bg-white rounded-3xl rotate-6 border border-slate-100 shadow-sm">
+                        </div>
+                        <div
+                            class="relative bg-gradient-to-br from-white to-slate-50 p-7 rounded-3xl shadow-xl border border-white/60">
+                            <svg class="w-14 h-14 text-red-700/70" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div
+                            class="absolute -bottom-2 -right-2 w-6 h-6 bg-red-600 rounded-lg shadow-lg flex items-center justify-center">
+                            <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight mb-4">
+                        Galeri <span class="text-red-700">Masih Kosong</span>
+                    </h3>
+
+                    <p class="text-slate-500 leading-relaxed mb-10 text-base md:text-lg font-medium opacity-80">
+                        Belum ada dokumentasi kegiatan yang ditemukan. Kami akan segera memperbarui koleksi foto untuk
+                        Anda.
+                    </p>
+
+                    <div class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+                        <span class="h-px w-8 bg-slate-200"></span>
+                        <span>Coming Soon</span>
+                        <span class="h-px w-8 bg-slate-200"></span>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
     <div id="imageModal"
-        class="fixed inset-0 bg-slate-950/98 backdrop-blur-md hidden flex-col items-center justify-center z-[100] p-4 transition-all duration-500">
-        <button onclick="closeModal()" class="absolute top-8 right-8 text-white/50 hover:text-white transition-colors">
-            <i class="fa-solid fa-xmark text-3xl"></i>
+        class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex-col items-center justify-center z-[9999] p-4 transition-all duration-300"
+        onclick="closeModalOutside(event)">
+
+        <button onclick="closeModal()"
+            class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[10000]">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
         </button>
 
-        <div class="max-w-5xl w-full">
-            <img id="modalImage" class="max-h-[80vh] mx-auto rounded-lg shadow-2xl object-contain">
-            <div class="mt-8 text-center">
-                <h2 id="modalTitle" class="text-white text-2xl font-medium tracking-wide"></h2>
-                <div class="h-0.5 w-12 bg-red-600 mx-auto mt-4"></div>
+        <div class="relative max-w-5xl w-full flex flex-col items-center justify-center"
+            onclick="event.stopPropagation()">
+            <img id="modalImage" class="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl">
+            <div class="mt-6 px-4 text-center">
+                <h2 id="modalTitle" class="text-white text-xl md:text-2xl font-bold tracking-wide"></h2>
             </div>
         </div>
     </div>
@@ -131,13 +114,10 @@
     <script>
         function openModal(src, title) {
             const modal = document.getElementById('imageModal');
-            const img = document.getElementById('modalImage');
-            const titleElem = document.getElementById('modalTitle');
-
+            document.getElementById('modalImage').src = src;
+            document.getElementById('modalTitle').innerText = title;
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            img.src = src;
-            titleElem.innerText = title;
             document.body.style.overflow = 'hidden';
         }
 
@@ -147,19 +127,17 @@
             modal.classList.remove('flex');
             document.body.style.overflow = 'auto';
         }
+
+        function closeModalOutside(event) {
+            if (event.target.id === 'imageModal') {
+                closeModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape") {
+                closeModal();
+            }
+        });
     </script>
-
-    <style>
-        .pagination {
-            @apply flex gap-1;
-        }
-
-        .page-item .page-link {
-            @apply px-4 py-2 rounded-lg border-none text-slate-500 font-medium hover:bg-slate-100 transition-colors;
-        }
-
-        .page-item.active .page-link {
-            @apply bg-red-600 text-white hover:bg-red-700;
-        }
-    </style>
 </x-front-layout>

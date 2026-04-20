@@ -1,3 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Frontend User */
+[x-cloak] {
+    display: none !important;
+}
+
+.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+}
+
+/*Halaman Custom*/
+.prose {
+    line-height: 1.8;
+    font-family: "Inter", sans-serif;
+}
+
+.prose h2,
+.prose h3 {
+    margin-top: 2.5em !important;
+    margin-bottom: 1em !important;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+}
+.prose p {
+    margin-bottom: 1.5em;
+}
+.prose img {
+    margin: 3.5rem auto !important;
+    display: block;
+}
+.prose blockquote {
+    border-left: 5px solid #b91c1c;
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 0 1.5rem 1.5rem 0;
+    font-style: italic;
+    color: #475569;
+    quotes: none;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+.prose ul > li::marker {
+    color: #b91c1c;
+}
+.prose ol > li::marker {
+    color: #b91c1c;
+    font-weight: bold;
+}
+.prose table {
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+.prose thead {
+    background-color: #f8fafc;
+}
+.prose a {
+    text-decoration: none;
+    font-weight: 700;
+    border-bottom: 2px solid #fee2e2;
+    transition: all 0.3s ease;
+}
+.prose a:hover {
+    background-color: #fef2f2;
+    border-bottom-color: #b91c1c;
+}
+.media,
+iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 1.5rem;
+    margin: 3rem 0;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    border: none;
+}

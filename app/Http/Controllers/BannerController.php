@@ -29,7 +29,8 @@ class BannerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'teks' => 'required',
+            'welcome_title' => 'nullable',
+            'teks' => 'nullable',
             'sub_teks' => 'nullable',
             'path_gambar' => 'required|image|mimes:webp,jpg,jpeg,png'
         ]);
@@ -41,6 +42,7 @@ class BannerController extends Controller
 
         Banner::create([
             'user_id' => Auth::id(),
+            'welcome_title' => $request->welcome_title,
             'teks' => $request->teks,
             'sub_teks' => $request->sub_teks,
             'path_gambar' => $path
@@ -58,12 +60,14 @@ class BannerController extends Controller
     public function update(Request $request, Banner $banner)
     {
         $request->validate([
-            'teks' => 'required',
+            'welcome_title' => 'nullable',
+            'teks' => 'nullable',
             'sub_teks' => 'nullable',
             'path_gambar' => 'nullable|image|mimes:webp,jpg,jpeg,png'
         ]);
 
         $data = [
+            'welcome_title' => $request->welcome_title,
             'teks' => $request->teks,
             'sub_teks' => $request->sub_teks,
         ];

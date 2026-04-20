@@ -17,14 +17,15 @@
         </div>
     </x-slot>
 
+    <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
+
     <div class="py-6">
         <div class="w-full px-4 sm:px-6 lg:px-10">
-            <form method="POST" action="{{ route('posts.update', $post) }}" enctype="multipart/form-data"
-                class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <form id="postForm" method="POST" action="{{ route('posts.update', $post) }}"
+                enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 @csrf
                 @method('PUT')
 
-                {{-- KOLOM KIRI: KONTEN UTAMA --}}
                 <div class="lg:col-span-2 space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
                         <div>
@@ -41,11 +42,11 @@
 
                         <div class="w-full">
                             <label class="block text-sm font-semibold text-slate-700 mb-2">Isi Konten</label>
-
-                            <div class="w-full">
-                                <textarea name="isi_konten" id="editor" class="w-full">
-            {{ old('isi_konten', $post->isi_konten) }}
-        </textarea>
+                            <div class="prose max-w-none">
+                                <div id="editor-wrapper">
+                                    <div id="editor">{!! old('isi_konten', $post->isi_konten) !!}</div>
+                                </div>
+                                <input type="hidden" name="isi_konten" id="isi_konten">
                             </div>
                         </div>
                     </div>
@@ -60,7 +61,6 @@
                                 <input type="file" name="gambar_thumbnail" id="imageInput"
                                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
 
-                                {{-- Preview Area --}}
                                 <div id="previewContainer"
                                     class="{{ $post->gambar_thumbnail ? '' : 'hidden' }} mb-2 relative">
                                     <img id="imagePreview"
@@ -74,7 +74,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Placeholder jika kosong --}}
                                 <div id="uploadPlaceholder" class="{{ $post->gambar_thumbnail ? 'hidden' : '' }}">
                                     <svg class="w-10 h-10 mx-auto text-slate-400 mb-2" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -124,85 +123,187 @@
         </div>
     </div>
 
-    {{-- Kustomisasi CSS untuk CKEditor --}}
     <style>
-        /* Membuat CKEditor Terlihat Lebih Luas dan Panjang */
-        .ck-editor__editable_inline {
-            min-height: 400px !important;
-            /* Tinggi minimal area ketik */
-            padding: 0 2rem !important;
-            /* Memberikan ruang samping agar tidak mepet */
+        .ql-toolbar.ql-snow {
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            border-color: #e2e8f0;
+            background-color: #f9fafb;
+            padding: 0.75rem;
         }
 
-        /* Memperhalus tampilan border CKEditor agar menyatu dengan Tailwind */
-        .ck-editor {
-            border-radius: 0.75rem !important;
+        .ql-container.ql-snow {
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            border-color: #e2e8f0;
+            background-color: white;
+            min-height: 400px;
+        }
+
+        .ql-container.ql-snow:focus-within {
+            border-color: #b91c1c;
+            box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.1);
+        }
+
+        .ql-editor {
+            min-height: 400px;
+            padding: 1.5rem;
+        }
+
+        .ql-snow .ql-picker.ql-size {
+            width: 100px;
+        }
+
+        .ql-snow .ql-picker.ql-size .ql-picker-label::before,
+        .ql-snow .ql-picker.ql-size .ql-picker-item::before {
+            content: 'Normal';
+        }
+
+        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before,
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before {
+            content: 'Kecil';
+        }
+
+        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before,
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before {
+            content: 'Besar';
+        }
+
+        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before,
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before {
+            content: 'Sangat Besar';
+        }
+
+        .ql-video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
             overflow: hidden;
-            border: 1px solid #e5e7eb !important;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
         }
 
-        .ck.ck-toolbar {
-            background-color: #f9fafb !important;
-            border-top: none !important;
-            border-left: none !important;
-            border-right: none !important;
-            padding: 0.5rem !important;
-        }
-
-        .ck.ck-content.ck-focused {
-            border: none !important;
-            box-shadow: inset 0 0 0 2px rgba(185, 28, 28, 0.1) !important;
-            /* Warna merah fokus */
+        .ql-video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
         }
     </style>
 
-    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
-        ClassicEditor
-            .create(document.querySelector('#editor'), {
-                extraPlugins: [MyCustomUploadAdapterPlugin],
-            })
-            .catch(error => {
-                console.error(error);
+        document.addEventListener("DOMContentLoaded", function() {
+            const BlockEmbed = Quill.import("blots/block/embed");
+            class ResponsiveVideo extends BlockEmbed {
+                static create(value) {
+                    let node = super.create(value);
+                    let iframe = document.createElement("iframe");
+                    iframe.setAttribute("frameborder", "0");
+                    iframe.setAttribute("allowfullscreen", true);
+                    iframe.setAttribute("src", value);
+                    iframe.setAttribute("style", "width: 100%; min-height: 400px; border:0;");
+                    node.appendChild(iframe);
+                    return node;
+                }
+                static value(node) {
+                    return node.querySelector("iframe").getAttribute("src");
+                }
+            }
+            ResponsiveVideo.blotName = "video";
+            ResponsiveVideo.tagName = "div";
+            ResponsiveVideo.className = "ql-video-container";
+            Quill.register(ResponsiveVideo, true);
+
+            const toolbarOptions = [
+                [{
+                    'size': ['small', false, 'large', 'huge']
+                }],
+                [{
+                    header: [1, 2, 3, false]
+                }],
+                ["bold", "italic", "underline", "strike"],
+                ["blockquote", "code-block"],
+                [{
+                    list: "ordered"
+                }, {
+                    list: "bullet"
+                }],
+                [{
+                    align: []
+                }],
+                ["link", "image", "video"],
+                ["clean"],
+            ];
+
+            const quill = new Quill("#editor", {
+                modules: {
+                    toolbar: toolbarOptions,
+                    imageResize: {
+                        displaySize: true,
+                        modules: ["Resize", "DisplaySize", "Toolbar"]
+                    }
+                },
+                theme: "snow",
+                placeholder: "Tulis isi berita menarik hari ini...",
             });
 
-        function MyCustomUploadAdapterPlugin(editor) {
-            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-                return new UploadAdapter(loader);
+            const form = document.querySelector("#postForm");
+            form.onsubmit = function() {
+                const isiKonten = document.querySelector("#isi_konten");
+                isiKonten.value = quill.root.innerHTML;
             };
-        }
 
-        class UploadAdapter {
-            constructor(loader) {
-                this.loader = loader;
-            }
-
-            upload() {
-                return this.loader.file.then(file => new Promise((resolve, reject) => {
-
-                    let formData = new FormData();
-                    formData.append('upload', file);
-                    formData.append('_token', '{{ csrf_token() }}');
-
+            quill.getModule("toolbar").addHandler("image", () => {
+                const input = document.createElement("input");
+                input.setAttribute("type", "file");
+                input.setAttribute("accept", "image/*");
+                input.click();
+                input.onchange = () => {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append("upload", file);
+                    formData.append("_token", "{{ csrf_token() }}");
                     fetch("{{ route('ckeditor.upload') }}", {
-                            method: 'POST',
-                            body: formData
+                            method: "POST",
+                            body: formData,
                         })
                         .then(response => response.json())
                         .then(result => {
-                            resolve({
-                                default: result.url
-                            });
+                            const range = quill.getSelection();
+                            quill.insertEmbed(range.index, "image", result.url);
                         })
-                        .catch(error => {
-                            reject(error);
-                        });
+                        .catch(error => console.error(error));
+                };
+            });
 
-                }));
-            }
+            const judul = document.querySelector('#judul');
+            const slug = document.querySelector('#slug');
+            judul.addEventListener('keyup', function() {
+                let text = judul.value.toLowerCase()
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                slug.value = text;
+            });
 
-            abort() {}
-        }
+            const imageInput = document.querySelector('#imageInput');
+            const imagePreview = document.querySelector('#imagePreview');
+            const previewContainer = document.querySelector('#previewContainer');
+            const uploadPlaceholder = document.querySelector('#uploadPlaceholder');
+
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                        uploadPlaceholder.classList.add('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
     </script>
 </x-app-layout>

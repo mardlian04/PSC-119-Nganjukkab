@@ -12,18 +12,11 @@
         </div>
     </x-slot>
 
-    <div class="py-10 antialiased">
-        <div class="w-full mx-auto sm:px-6 lg:px-8">
+    <div class="py-2 antialiased">
+        <div class="w-full mx-auto">
             <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/40 overflow-hidden border border-gray-50">
-
-                <div class="bg-gradient-to-r from-[#B32121] to-[#8E1A1A] px-10 py-6 flex justify-between items-center">
-                    <span class="text-white/90 text-sm font-medium">ID Menu: <span
-                            class="font-mono text-white">#{{ $menu->id }}</span></span>
-                    <i class="fa-solid fa-pen-to-square text-white/30 text-xl"></i>
-                </div>
-
                 <div class="p-10 md:p-14">
-                    <form method="POST" action="{{ route('menu.update', $menu) }}" class="space-y-10">
+                    <form method="POST" action="{{ route('menu.update', $menu->id) }}" class="space-y-10">
                         @csrf
                         @method('PUT')
 

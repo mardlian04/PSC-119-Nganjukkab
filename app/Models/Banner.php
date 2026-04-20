@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Banner extends Model
 {
     protected $fillable = [
-        'user_id','teks','sub_teks','path_gambar','urutan_priority','is_active'
+        'user_id', 'welcome_title', 'teks', 'sub_teks', 'path_gambar', 'urutan_priority', 'is_active'
     ];
 
     public function user()

@@ -25,7 +25,7 @@ class PostController extends Controller
                 });
             })
             ->latest()
-            ->paginate(3)
+            ->paginate(6)
             ->withQueryString();
 
         return view('postingan.index', compact('posts'));

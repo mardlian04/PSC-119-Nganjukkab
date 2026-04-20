@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Menu extends Model
 {
+    protected $table = 'menu';
+
     protected $fillable = [
         'parent_id','user_id','nama_menu','link_url','urutan','is_active'
     ];

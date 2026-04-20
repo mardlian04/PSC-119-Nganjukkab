@@ -38,7 +38,7 @@
                                         Label Menu</label>
                                     <input type="text" name="nama_menu" id="nama_menu" required
                                         class="w-full px-5 py-4 bg-gray-50 border-transparent focus:bg-white focus:border-[#B32121] focus:ring-4 focus:ring-red-100 rounded-2xl transition-all duration-300 text-gray-800 placeholder-gray-400"
-                                        placeholder="Misal: Layanan Ambulans">
+                                        placeholder="Isi Judul Menu Navigasi">
                                 </div>
                             </div>
 
@@ -89,7 +89,7 @@
                                     </div>
                                     <input type="text" name="link_url" id="link_url"
                                         class="w-full pl-12 pr-5 py-4 bg-gray-50 border-transparent focus:bg-white focus:border-[#B32121] focus:ring-4 focus:ring-red-100 rounded-2xl transition-all duration-300 text-gray-600 font-mono text-sm"
-                                        placeholder="/informasi-kesehatan">
+                                        placeholder="halaman/tentang-kami">
                                 </div>
                             </div>
 

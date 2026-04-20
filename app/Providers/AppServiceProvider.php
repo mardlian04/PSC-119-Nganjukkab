@@ -17,7 +17,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (!app()->runningInConsole()) {
-
             $exists = Visitor::where('ip_address', request()->ip())
                 ->where('visit_date', now()->toDateString())
                 ->exists();
@@ -33,8 +32,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer('*', function ($view) {
-
-            $menus = Menu::whereNull('parent_id')
+            $menuNavigation = Menu::whereNull('parent_id')
                 ->where('is_active', 1)
                 ->with(['children' => function ($q) {
                     $q->where('is_active', 1)->orderBy('urutan');
@@ -42,7 +40,14 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('urutan')
                 ->get();
 
-            $view->with('menus', $menus);
+            $visitorToday = Visitor::where('visit_date', now()->toDateString())->count();
+            $totalVisitors = Visitor::count();
+
+            $view->with([
+                'menuNavigation' => $menuNavigation,
+                'visitorToday'   => $visitorToday,
+                'totalVisitors'  => $totalVisitors
+            ]);
         });
     }
 }

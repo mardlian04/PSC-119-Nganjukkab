@@ -9,12 +9,11 @@
     </x-slot>
 
     <div class="py-2">
-        <div class="w-full mx-auto sm:px-6 lg:px-8">
+        <div class="w-full mx-auto">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
-
                 <div class="p-8">
-                    <form method="POST" action="{{ route('pages.store') }}" enctype="multipart/form-data"
-                        class="space-y-8">
+                    <form id="pageForm" method="POST" action="{{ route('pages.store') }}"
+                        enctype="multipart/form-data" class="space-y-8">
                         @csrf
 
                         <div>
@@ -37,8 +36,13 @@
                             <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">
                                 Konten Halaman
                             </label>
-                            <div class="prose max-w-none ck-editor-container">
-                                <textarea name="isi_konten" id="editor"></textarea>
+                            <div class="w-full">
+                                <div class="prose max-w-none">
+                                    <div id="editor-container">
+                                        <div id="editor"></div>
+                                    </div>
+                                    <input type="hidden" name="isi_konten" id="isi_konten">
+                                </div>
                             </div>
                             <p class="mt-2 text-xs text-gray-400 italic font-medium">
                                 <i class="fa-solid fa-circle-info mr-1"></i> Gunakan editor di atas untuk menyusun
@@ -59,8 +63,6 @@
                                 <div class="flex-1">
                                     <input type="file" name="gambar_fitur"
                                         class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 transition cursor-pointer">
-                                    <p class="mt-2 text-xs text-gray-400">Rekomendasi ukuran: 1200 x 600 pixel (Maks.
-                                        2MB)</p>
                                 </div>
                             </div>
                         </div>
@@ -76,86 +78,166 @@
                                 Publikasikan Halaman
                             </button>
                         </div>
-
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        .ck-editor__editable_inline {
-            min-height: 400px !important;
-            padding: 0 2rem !important;
-        }
-
-        .ck-editor {
-            border-radius: 0.75rem !important;
-            overflow: hidden;
-            border: 1px solid #e5e7eb !important;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-        }
-
-        .ck.ck-toolbar {
-            background-color: #f9fafb !important;
-            border-top: none !important;
-            border-left: none !important;
-            border-right: none !important;
-            padding: 0.5rem !important;
-        }
-
-        .ck.ck-content.ck-focused {
-            border: none !important;
-            box-shadow: inset 0 0 0 2px rgba(185, 28, 28, 0.1) !important;
-        }
-    </style>
-
-    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
-        ClassicEditor
-            .create(document.querySelector('#editor'), {
-                extraPlugins: [MyCustomUploadAdapterPlugin],
-            })
-            .catch(error => {
-                console.error(error);
+        document.addEventListener("DOMContentLoaded", function() {
+            const BlockEmbed = Quill.import("blots/block/embed");
+
+            class ResponsiveVideo extends BlockEmbed {
+                static create(value) {
+                    let node = super.create(value);
+                    let iframe = document.createElement("iframe");
+                    iframe.setAttribute("frameborder", "0");
+                    iframe.setAttribute("allowfullscreen", true);
+                    iframe.setAttribute("src", value);
+                    iframe.setAttribute(
+                        "style",
+                        "width: 100%; min-height: 450px; border:0;",
+                    );
+                    node.appendChild(iframe);
+                    return node;
+                }
+                static value(node) {
+                    return node.querySelector("iframe").getAttribute("src");
+                }
+            }
+            ResponsiveVideo.blotName = "video";
+            ResponsiveVideo.tagName = "div";
+            ResponsiveVideo.className = "ql-video-container";
+            Quill.register(ResponsiveVideo, true);
+
+            const toolbarOptions = [
+                [{
+                    header: [1, 2, 3, 4, 5, 6, false],
+                }, ],
+                ["bold", "italic", "underline", "strike"],
+                ["blockquote", "code-block"],
+                [{
+                        list: "ordered",
+                    },
+                    {
+                        list: "bullet",
+                    },
+                ],
+                [{
+                        script: "sub",
+                    },
+                    {
+                        script: "super",
+                    },
+                ],
+                [{
+                        indent: "-1",
+                    },
+                    {
+                        indent: "+1",
+                    },
+                ],
+                [{
+                    direction: "rtl",
+                }, ],
+                [{
+                        color: [],
+                    },
+                    {
+                        background: [],
+                    },
+                ],
+                [{
+                    align: [],
+                }, ],
+                ["link", "image", "video"],
+                ["clean"],
+            ];
+
+            const quill = new Quill("#editor", {
+                modules: {
+                    toolbar: toolbarOptions,
+                    imageResize: {
+                        displaySize: true,
+                        modules: ["Resize", "DisplaySize", "Toolbar"],
+                    },
+                },
+                theme: "snow",
+                placeholder: "Tulis konten anda di sini...",
             });
 
-        function MyCustomUploadAdapterPlugin(editor) {
-            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-                return new UploadAdapter(loader);
+            const form = document.querySelector("#pageForm");
+            form.onsubmit = function() {
+                const isiKonten = document.querySelector("#isi_konten");
+                isiKonten.value = quill.root.innerHTML;
             };
-        }
 
-        class UploadAdapter {
-            constructor(loader) {
-                this.loader = loader;
-            }
-
-            upload() {
-                return this.loader.file.then(file => new Promise((resolve, reject) => {
-
-                    let formData = new FormData();
-                    formData.append('upload', file);
-                    formData.append('_token', '{{ csrf_token() }}');
+            quill.getModule("toolbar").addHandler("image", () => {
+                const input = document.createElement("input");
+                input.setAttribute("type", "file");
+                input.setAttribute("accept", "image/*");
+                input.click();
+                input.onchange = () => {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append("upload", file);
+                    formData.append("_token", "{{ csrf_token() }}");
 
                     fetch("{{ route('ckeditor.upload') }}", {
-                            method: 'POST',
-                            body: formData
+                            method: "POST",
+                            body: formData,
                         })
-                        .then(response => response.json())
-                        .then(result => {
-                            resolve({
-                                default: result.url
-                            });
+                        .then((response) => response.json())
+                        .then((result) => {
+                            const range = quill.getSelection();
+                            quill.insertEmbed(range.index, "image", result.url);
                         })
-                        .catch(error => {
-                            reject(error);
-                        });
-
-                }));
-            }
-
-            abort() {}
-        }
+                        .catch((error) => console.error("Error:", error));
+                };
+            });
+        });
     </script>
+    <style>
+        .ql-toolbar.ql-snow {
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            border-color: #e5e7eb;
+            background-color: #f9fafb;
+            padding: 0.75rem;
+        }
+
+        .ql-container.ql-snow {
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            border-color: #e5e7eb;
+            font-size: 1rem;
+            background-color: white;
+            min-height: 500px;
+        }
+
+        .ql-editor {
+            min-height: 500px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .ql-video-container {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+            margin: 2rem auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .ql-video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+    </style>
 </x-app-layout>

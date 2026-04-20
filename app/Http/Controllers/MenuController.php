@@ -10,12 +10,12 @@ class MenuController extends Controller
 {
     public function index()
     {
-        $menus = Menu::with('children')
+        $menu = Menu::with('children')
             ->whereNull('parent_id')
             ->orderBy('urutan')
             ->get();
 
-        return view('admin.menu.index', compact('menus'));
+        return view('admin.menu.index', compact('menu'));
     }
 
     public function create()

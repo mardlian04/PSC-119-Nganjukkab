@@ -8,19 +8,19 @@
         </div>
     </x-slot>
 
-    <div class="py-10">
-        <div class="w-full mx-auto sm:px-6 lg:px-8">
+    <div class="py-2">
+        <div class="w-full mx-auto">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
                 <div class="p-8">
-                    <form method="POST" action="{{ route('pages.update', $page) }}" enctype="multipart/form-data"
-                        class="space-y-8">
+                    <form id="editPageForm" method="POST" action="{{ route('pages.update', $page) }}"
+                        enctype="multipart/form-data" class="space-y-8">
                         @csrf
                         @method('PUT')
 
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Judul
                                 Halaman</label>
-                            <input type="text" name="judul_halaman" value="{{ $page->judul_halaman }}"
+                            <input type="text" name="judul_halaman" value="{{ $page->judul_halaman }}" required
                                 class="w-full border-gray-200 focus:border-red-500 focus:ring-red-500 rounded-xl shadow-sm transition-all py-3 px-4 text-lg font-medium"
                                 placeholder="Masukkan judul...">
                         </div>
@@ -28,8 +28,11 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Isi
                                 Konten</label>
-                            <div class="prose max-w-none">
-                                <textarea name="isi_konten" id="editor">{{ $page->isi_konten }}</textarea>
+                            <div class="w-full">
+                                <div class="prose max-w-none">
+                                    <div id="editor" class="bg-white">{!! $page->isi_konten !!}</div>
+                                    <input type="hidden" name="isi_konten" id="isi_konten">
+                                </div>
                             </div>
                         </div>
 
@@ -81,78 +84,151 @@
         </div>
     </div>
 
-    {{-- Minimalist CKEditor Customization --}}
-    <style>
-        .ck-editor__editable_inline {
-            min-height: 350px !important;
-            padding: 0 1.5rem !important;
-        }
-
-        .ck.ck-editor {
-            border-radius: 0.75rem !important;
-            overflow: hidden;
-            border: 1px solid #e5e7eb !important;
-        }
-
-        .ck.ck-toolbar {
-            background-color: #fafafa !important;
-            border: none !important;
-            border-bottom: 1px solid #f3f4f6 !important;
-        }
-
-        .ck.ck-content.ck-focused {
-            border: none !important;
-            box-shadow: none !important;
-        }
-    </style>
-
-    {{-- SCRIPT TETAP --}}
-    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
-        ClassicEditor
-            .create(document.querySelector('#editor'), {
-                extraPlugins: [MyCustomUploadAdapterPlugin],
-            })
-            .catch(error => {
-                console.error(error);
+        document.addEventListener("DOMContentLoaded", function() {
+            const BlockEmbed = Quill.import("blots/block/embed");
+
+            class ResponsiveVideo extends BlockEmbed {
+                static create(value) {
+                    let node = super.create(value);
+                    let iframe = document.createElement("iframe");
+                    iframe.setAttribute("frameborder", "0");
+                    iframe.setAttribute("allowfullscreen", true);
+                    iframe.setAttribute("src", value);
+                    iframe.setAttribute("style", "width: 100%; min-height: 450px; border:0;");
+                    node.appendChild(iframe);
+                    return node;
+                }
+                static value(node) {
+                    return node.querySelector("iframe").getAttribute("src");
+                }
+            }
+            ResponsiveVideo.blotName = "video";
+            ResponsiveVideo.tagName = "div";
+            ResponsiveVideo.className = "ql-video-container";
+            Quill.register(ResponsiveVideo, true);
+
+            const toolbarOptions = [
+                [{
+                    header: [1, 2, 3, 4, 5, 6, false]
+                }],
+                ["bold", "italic", "underline", "strike"],
+                ["blockquote", "code-block"],
+                [{
+                    list: "ordered"
+                }, {
+                    list: "bullet"
+                }],
+                [{
+                    script: "sub"
+                }, {
+                    script: "super"
+                }],
+                [{
+                    indent: "-1"
+                }, {
+                    indent: "+1"
+                }],
+                [{
+                    direction: "rtl"
+                }],
+                [{
+                    color: []
+                }, {
+                    background: []
+                }],
+                [{
+                    align: []
+                }],
+                ["link", "image", "video"],
+                ["clean"],
+            ];
+
+            const quill = new Quill("#editor", {
+                modules: {
+                    toolbar: toolbarOptions,
+                    imageResize: {
+                        displaySize: true,
+                        modules: ["Resize", "DisplaySize", "Toolbar"],
+                    },
+                },
+                theme: "snow",
+                placeholder: "Tulis konten anda di sini...",
             });
 
-        function MyCustomUploadAdapterPlugin(editor) {
-            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-                return new UploadAdapter(loader);
+            const form = document.querySelector("#editPageForm");
+            form.onsubmit = function() {
+                const isiKonten = document.querySelector("#isi_konten");
+                isiKonten.value = quill.root.innerHTML;
             };
-        }
 
-        class UploadAdapter {
-            constructor(loader) {
-                this.loader = loader;
-            }
-
-            upload() {
-                return this.loader.file.then(file => new Promise((resolve, reject) => {
-
-                    let formData = new FormData();
-                    formData.append('upload', file);
-                    formData.append('_token', '{{ csrf_token() }}');
+            quill.getModule("toolbar").addHandler("image", () => {
+                const input = document.createElement("input");
+                input.setAttribute("type", "file");
+                input.setAttribute("accept", "image/*");
+                input.click();
+                input.onchange = () => {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append("upload", file);
+                    formData.append("_token", "{{ csrf_token() }}");
 
                     fetch("{{ route('ckeditor.upload') }}", {
-                            method: 'POST',
-                            body: formData
+                            method: "POST",
+                            body: formData,
                         })
-                        .then(response => response.json())
-                        .then(result => {
-                            resolve({
-                                default: result.url
-                            });
+                        .then((response) => response.json())
+                        .then((result) => {
+                            const range = quill.getSelection();
+                            quill.insertEmbed(range.index, "image", result.url);
                         })
-                        .catch(error => {
-                            reject(error);
-                        });
-
-                }));
-            }
-
-            abort() {}
-        }
+                        .catch((error) => console.error("Error:", error));
+                };
+            });
+        });
     </script>
+
+    <style>
+        .ql-toolbar.ql-snow {
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            border-color: #e5e7eb;
+            background-color: #f9fafb;
+            padding: 0.75rem;
+        }
+
+        .ql-container.ql-snow {
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            border-color: #e5e7eb;
+            font-size: 1rem;
+            background-color: white;
+            min-height: 500px;
+        }
+
+        .ql-editor {
+            min-height: 500px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .ql-video-container {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+            margin: 2rem auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .ql-video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+    </style>
 </x-app-layout>

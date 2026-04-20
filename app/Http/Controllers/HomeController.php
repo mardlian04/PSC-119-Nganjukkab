@@ -5,19 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Banner;
 use App\Models\Page;
+use App\Models\Gallery;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $posts = Post::where('status', 'publish')
-            ->latest()
-            ->paginate(6);
-        $banner = Banner::latest()->first();
+        $banner = Banner::first();
+        $posts = Post::latest()->take(4)->get();
+        $galeri = Gallery::latest()->take(10)->get();
 
-        return view('welcome', compact('posts', 'banner'));
+        return view('welcome', compact('banner', 'posts', 'galeri'));
     }
-
+    
     public function show($slug)
     {
         $post = Post::where('slug', $slug)
@@ -32,14 +32,5 @@ class HomeController extends Controller
             ->take(5)  
             ->get();
         return view('postingan.detail-post', compact('post', 'beritaLainnya'));
-    }
-
-    public function pageDetail($slug)
-    {
-        $page = Page::where('slug', $slug)->first();
-
-        if ($page) {
-            return view('halaman.index', compact('page'));
-        }
     }
 }

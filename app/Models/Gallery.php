@@ -3,17 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Gallery extends Model
 {
     protected $fillable = [
         'user_id',
-        'judul_file',
+        'judul',
         'slug',
-        'tipe_file',
-        'path_file',
-        'keterangan'
+        'gambar',
+        'deskripsi'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($gallery) {
+            $gallery->slug = Str::slug($gallery->judul) . '-' . uniqid();
+        });
+    }
 
     public function user()
     {
