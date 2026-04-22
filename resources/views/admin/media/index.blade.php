@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Manajemen Galeri</h2>
+                <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Kelola Postingan Media</h2>
                 <p class="text-xs text-gray-500 uppercase tracking-[0.2em] font-semibold mt-1">Dokumentasi Media & Arsip
                     PSC 119</p>
             </div>

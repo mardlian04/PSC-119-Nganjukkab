@@ -29,10 +29,10 @@
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Isi
                                 Konten</label>
                             <div class="w-full">
-                                <div class="prose max-w-none">
-                                    <div id="editor" class="bg-white">{!! $page->isi_konten !!}</div>
-                                    <input type="hidden" name="isi_konten" id="isi_konten">
+                                <div id="editor-wrapper" class="bg-white">
+                                    <div id="editor">{!! $page->isi_konten !!}</div>
                                 </div>
+                                <input type="hidden" name="isi_konten" id="isi_konten">
                             </div>
                         </div>
 
@@ -86,8 +86,10 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const BlockEmbed = Quill.import("blots/block/embed");
+            if (typeof Quill === 'undefined') return;
 
+            // Register Video Blot (Tetap dipertahankan dari kode lama Anda)
+            const BlockEmbed = Quill.import("blots/block/embed");
             class ResponsiveVideo extends BlockEmbed {
                 static create(value) {
                     let node = super.create(value);
@@ -110,85 +112,127 @@
 
             const toolbarOptions = [
                 [{
-                    header: [1, 2, 3, 4, 5, 6, false]
+                    'header': [1, 2, 3, 4, 5, 6, false]
                 }],
-                ["bold", "italic", "underline", "strike"],
-                ["blockquote", "code-block"],
+                ['bold', 'italic', 'underline', 'strike'],
                 [{
-                    list: "ordered"
+                    'color': []
                 }, {
-                    list: "bullet"
+                    'background': []
                 }],
+                ['blockquote', 'code-block'],
                 [{
-                    script: "sub"
+                    'list': 'ordered'
                 }, {
-                    script: "super"
+                    'list': 'bullet'
                 }],
                 [{
-                    indent: "-1"
+                    'indent': '-1'
                 }, {
-                    indent: "+1"
-                }],
-                [{
-                    direction: "rtl"
-                }],
-                [{
-                    color: []
+                    'indent': '+1'
                 }, {
-                    background: []
+                    'align': []
                 }],
-                [{
-                    align: []
-                }],
-                ["link", "image", "video"],
-                ["clean"],
+                ['link', 'image', 'video'],
+                ['table'],
+                ['clean']
             ];
 
             const quill = new Quill("#editor", {
                 modules: {
-                    toolbar: toolbarOptions,
+                    toolbar: {
+                        container: toolbarOptions,
+                        handlers: {
+                            image: function() {
+                                const input = document.createElement("input");
+                                input.setAttribute("type", "file");
+                                input.setAttribute("accept", "image/*");
+                                input.click();
+                                input.onchange = () => {
+                                    const file = input.files[0];
+                                    const formData = new FormData();
+                                    formData.append("upload", file);
+                                    formData.append("_token", "{{ csrf_token() }}");
+                                    fetch("{{ route('ckeditor.upload') }}", {
+                                            method: "POST",
+                                            body: formData,
+                                        })
+                                        .then(response => response.json())
+                                        .then(result => {
+                                            const range = quill.getSelection();
+                                            quill.insertEmbed(range.index, "image", result.url);
+                                        });
+                                };
+                            }
+                        }
+                    },
+                    table: true,
                     imageResize: {
                         displaySize: true,
-                        modules: ["Resize", "DisplaySize", "Toolbar"],
-                    },
+                        modules: ['Resize', 'DisplaySize', 'Toolbar']
+                    }
                 },
                 theme: "snow",
                 placeholder: "Tulis konten anda di sini...",
             });
 
+            // Logic Tabel (Context Menu)
+            const tableModule = quill.getModule('table');
+            document.addEventListener('click', (e) => {
+                const tableBtn = e.target.closest('.ql-table');
+                if (tableBtn) {
+                    const tooltip = document.querySelector('.ql-table-tooltip');
+                    if (!tooltip) {
+                        const menu = document.createElement('div');
+                        menu.className =
+                            'ql-table-tooltip bg-white shadow-xl border border-gray-200 rounded-lg p-2 absolute z-[50] grid grid-cols-1 gap-1';
+                        menu.innerHTML = `
+                            <button type="button" class="insert-row-below text-left px-3 py-1 hover:bg-gray-100 rounded text-xs font-bold">➕ Baris (Bawah)</button>
+                            <button type="button" class="insert-col-right text-left px-3 py-1 hover:bg-gray-100 rounded text-xs font-bold">➡️ Kolom (Kanan)</button>
+                            <hr class="my-1">
+                            <button type="button" class="delete-row text-left px-3 py-1 hover:bg-red-50 text-red-600 rounded text-xs font-bold">🗑️ Hapus Baris</button>
+                            <button type="button" class="delete-col text-left px-3 py-1 hover:bg-red-50 text-red-600 rounded text-xs font-bold">🗑️ Hapus Kolom</button>
+                            <button type="button" class="delete-table text-left px-3 py-1 hover:bg-red-600 hover:text-white text-red-600 rounded text-xs font-bold">🔥 Hapus Tabel</button>
+                        `;
+                        document.body.appendChild(menu);
+                        const rect = tableBtn.getBoundingClientRect();
+                        menu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                        menu.style.left = `${rect.left + window.scrollX}px`;
+
+                        menu.addEventListener('click', (event) => {
+                            if (event.target.classList.contains('insert-row-below')) tableModule
+                                .insertRowBelow();
+                            if (event.target.classList.contains('insert-col-right')) tableModule
+                                .insertColumnRight();
+                            if (event.target.classList.contains('delete-row')) tableModule
+                                .deleteRow();
+                            if (event.target.classList.contains('delete-col')) tableModule
+                                .deleteColumn();
+                            if (event.target.classList.contains('delete-table')) tableModule
+                                .deleteTable();
+                            menu.remove();
+                        });
+
+                        document.addEventListener('mousedown', (clickOut) => {
+                            if (!menu.contains(clickOut.target) && !tableBtn.contains(clickOut
+                                    .target)) menu.remove();
+                        }, {
+                            once: true
+                        });
+                    }
+                }
+            });
+
             const form = document.querySelector("#editPageForm");
             form.onsubmit = function() {
-                const isiKonten = document.querySelector("#isi_konten");
-                isiKonten.value = quill.root.innerHTML;
+                // Menggunakan getSemanticHTML agar output table lebih bersih untuk disimpan ke DB
+                document.querySelector("#isi_konten").value = quill.getSemanticHTML();
             };
-
-            quill.getModule("toolbar").addHandler("image", () => {
-                const input = document.createElement("input");
-                input.setAttribute("type", "file");
-                input.setAttribute("accept", "image/*");
-                input.click();
-                input.onchange = () => {
-                    const file = input.files[0];
-                    const formData = new FormData();
-                    formData.append("upload", file);
-                    formData.append("_token", "{{ csrf_token() }}");
-
-                    fetch("{{ route('ckeditor.upload') }}", {
-                            method: "POST",
-                            body: formData,
-                        })
-                        .then((response) => response.json())
-                        .then((result) => {
-                            const range = quill.getSelection();
-                            quill.insertEmbed(range.index, "image", result.url);
-                        })
-                        .catch((error) => console.error("Error:", error));
-                };
-            });
         });
     </script>
 
     <style>
+        /* Toolbar & Editor Styling */
         .ql-toolbar.ql-snow {
             border-top-left-radius: 0.75rem;
             border-top-right-radius: 0.75rem;
@@ -202,16 +246,28 @@
             border-bottom-right-radius: 0.75rem;
             border-color: #e5e7eb;
             font-size: 1rem;
-            background-color: white;
             min-height: 500px;
         }
 
         .ql-editor {
             min-height: 500px;
-            max-height: 800px;
-            overflow-y: auto;
+            max-height: 1000px;
         }
 
+        /* Table Design dalam Editor */
+        .ql-editor table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .ql-editor table td {
+            border: 1px solid #d1d5db;
+            padding: 8px 12px;
+        }
+
+        /* Video Styling */
         .ql-video-container {
             position: relative;
             width: 100%;
@@ -228,7 +284,6 @@
             left: 0;
             width: 100% !important;
             height: 100% !important;
-            border: none;
         }
     </style>
 </x-app-layout>

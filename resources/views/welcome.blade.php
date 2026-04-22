@@ -5,7 +5,7 @@
         <section class="relative overflow-hidden" aria-labelledby="banner-heading">
             <div class="absolute inset-0">
                 <img src="{{ asset('storage/' . $banner->path_gambar) }}" class="w-full h-full object-cover object-center"
-                    alt="Banner Utama PSC 119 Nganjuk" loading="eager">
+                    alt="Banner Utama PSC 119 Nganjuk" fetchpriority="high" loading="eager">
                 <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"
                     aria-hidden="true">
                 </div>

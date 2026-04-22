@@ -19,8 +19,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
 
-    <div class="py-6">
-        <div class="w-full px-4 sm:px-6 lg:px-10">
+    <div class="py-2">
+        <div class="w-full sm:px-6">
             <form id="postForm" method="POST" action="{{ route('posts.update', $post) }}"
                 enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 @csrf

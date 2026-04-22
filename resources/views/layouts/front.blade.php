@@ -7,7 +7,7 @@
     <meta name="description" content="Website Resmi PSC 119 Kabupaten Nganjuk">
     <meta name="author" content="PSC 119 Kab. Nganjuk">
     <title>{{ $title ?? 'PSC 119 | Kab. Nganjuk' }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('LogoPSC.png') }}">
+    <link rel="preload" as="image" href="{{ asset('LogoPSC.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -30,7 +30,7 @@
 
         <div class="relative flex items-center justify-center">
             <div class="absolute w-20 h-20 md:w-24 md:h-24 bg-red-100 rounded-full animate-ping opacity-20"></div>
-            <img src="{{ asset('Logo PSC.png') }}"
+            <img src="{{ asset('LogoPSC.png') }}"
                 class="relative w-24 h-24 md:w-32 md:h-32 animate-pulse object-contain" alt="Loading PSC Nganjuk">
         </div>
 

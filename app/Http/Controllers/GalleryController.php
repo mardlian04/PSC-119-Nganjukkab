@@ -17,7 +17,7 @@ class GalleryController extends Controller
 
     public function publicGallery()
     {
-        $galleries = \App\Models\Gallery::latest()->paginate(9);
+        $galleries = \App\Models\Gallery::latest()->paginate(8);
         return view('galeri.index', compact('galleries'));
     }
 
@@ -30,7 +30,7 @@ class GalleryController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'gambar' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'gambar' => 'required|image|mimes:jpg,jpeg,png',
             'deskripsi' => 'nullable|string'
         ]);
 
@@ -55,7 +55,7 @@ class GalleryController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png',
             'deskripsi' => 'nullable|string'
         ]);
 

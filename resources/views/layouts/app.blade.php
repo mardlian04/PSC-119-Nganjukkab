@@ -21,7 +21,7 @@
 
         <div class="relative flex items-center justify-center">
             <div class="absolute w-20 h-20 md:w-24 md:h-24 bg-red-100 rounded-full animate-ping opacity-20"></div>
-            <img src="{{ asset('Logo PSC.png') }}"
+            <img src="{{ asset('LogoPSC.png') }}"
                 class="relative w-24 h-24 md:w-32 md:h-32 animate-pulse object-contain" alt="Loading PSC Nganjuk">
         </div>
 

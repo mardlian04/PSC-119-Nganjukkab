@@ -23,8 +23,11 @@ class MediaController extends Controller
     public function publicMedia()
     {
         try {
-            $media = Media::latest()->paginate(12);
-            return view('media.index', compact('media'));
+            $media_cetak = Media::where('kategori', 'media_cetak')->latest()->paginate(3, ['*'], 'cetak');
+            $media_publikasi = Media::where('kategori', 'media_publikasi')->latest()->paginate(3, ['*'], 'publikasi');
+            $infografis = Media::where('kategori', 'infografis')->latest()->paginate(3, ['*'], 'infografis');
+
+            return view('media.index', compact('media_cetak', 'media_publikasi', 'infografis'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menampilkan media');
         }

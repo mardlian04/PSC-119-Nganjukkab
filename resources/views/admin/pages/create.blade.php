@@ -37,17 +37,11 @@
                                 Konten Halaman
                             </label>
                             <div class="w-full">
-                                <div class="prose max-w-none">
-                                    <div id="editor-container">
-                                        <div id="editor"></div>
-                                    </div>
-                                    <input type="hidden" name="isi_konten" id="isi_konten">
+                                <div id="editor-wrapper" class="bg-white">
+                                    <div id="editor"></div>
                                 </div>
+                                <input type="hidden" name="isi_konten" id="isi_konten">
                             </div>
-                            <p class="mt-2 text-xs text-gray-400 italic font-medium">
-                                <i class="fa-solid fa-circle-info mr-1"></i> Gunakan editor di atas untuk menyusun
-                                konten yang informatif.
-                            </p>
                         </div>
 
                         <div
@@ -83,120 +77,147 @@
             </div>
         </div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const BlockEmbed = Quill.import("blots/block/embed");
-
-            class ResponsiveVideo extends BlockEmbed {
-                static create(value) {
-                    let node = super.create(value);
-                    let iframe = document.createElement("iframe");
-                    iframe.setAttribute("frameborder", "0");
-                    iframe.setAttribute("allowfullscreen", true);
-                    iframe.setAttribute("src", value);
-                    iframe.setAttribute(
-                        "style",
-                        "width: 100%; min-height: 450px; border:0;",
-                    );
-                    node.appendChild(iframe);
-                    return node;
-                }
-                static value(node) {
-                    return node.querySelector("iframe").getAttribute("src");
-                }
-            }
-            ResponsiveVideo.blotName = "video";
-            ResponsiveVideo.tagName = "div";
-            ResponsiveVideo.className = "ql-video-container";
-            Quill.register(ResponsiveVideo, true);
+            if (typeof Quill === 'undefined') return;
 
             const toolbarOptions = [
                 [{
-                    header: [1, 2, 3, 4, 5, 6, false],
-                }, ],
-                ["bold", "italic", "underline", "strike"],
-                ["blockquote", "code-block"],
+                    'header': [1, 2, 3, 4, 5, 6, false]
+                }],
                 [{
-                        list: "ordered",
-                    },
-                    {
-                        list: "bullet",
-                    },
-                ],
+                    'font': []
+                }, {
+                    'size': ['small', false, 'large', 'huge']
+                }],
+                ['bold', 'italic', 'underline', 'strike'],
                 [{
-                        script: "sub",
-                    },
-                    {
-                        script: "super",
-                    },
-                ],
+                    'color': []
+                }, {
+                    'background': []
+                }],
+                ['blockquote', 'code-block'],
                 [{
-                        indent: "-1",
-                    },
-                    {
-                        indent: "+1",
-                    },
-                ],
+                    'list': 'ordered'
+                }, {
+                    'list': 'bullet'
+                }, {
+                    'list': 'check'
+                }],
                 [{
-                    direction: "rtl",
-                }, ],
-                [{
-                        color: [],
-                    },
-                    {
-                        background: [],
-                    },
-                ],
-                [{
-                    align: [],
-                }, ],
-                ["link", "image", "video"],
-                ["clean"],
+                    'indent': '-1'
+                }, {
+                    'indent': '+1'
+                }, {
+                    'align': []
+                }],
+                ['link', 'image', 'video'],
+                ['table'],
+                ['clean']
             ];
 
             const quill = new Quill("#editor", {
                 modules: {
-                    toolbar: toolbarOptions,
+                    toolbar: {
+                        container: toolbarOptions,
+                        handlers: {
+                            image: function() {
+                                const input = document.createElement("input");
+                                input.setAttribute("type", "file");
+                                input.setAttribute("accept", "image/*");
+                                input.click();
+                                input.onchange = () => {
+                                    const file = input.files[0];
+                                    const formData = new FormData();
+                                    formData.append("upload", file);
+                                    formData.append("_token", "{{ csrf_token() }}");
+                                    fetch("{{ route('ckeditor.upload') }}", {
+                                            method: "POST",
+                                            body: formData,
+                                        })
+                                        .then(response => response.json())
+                                        .then(result => {
+                                            const range = quill.getSelection();
+                                            quill.insertEmbed(range.index, "image", result.url);
+                                        });
+                                };
+                            }
+                        }
+                    },
+                    table: true,
                     imageResize: {
                         displaySize: true,
-                        modules: ["Resize", "DisplaySize", "Toolbar"],
+                        handleStyles: {
+                            backgroundColor: '#b91c1c',
+                            border: 'none',
+                            color: 'white'
+                        },
+                        modules: ['Resize', 'DisplaySize', 'Toolbar']
                     },
                 },
                 theme: "snow",
                 placeholder: "Tulis konten anda di sini...",
             });
 
+            const tableModule = quill.getModule('table');
+            document.addEventListener('click', (e) => {
+                const tableBtn = e.target.closest('.ql-table');
+                if (tableBtn) {
+                    const tooltip = document.querySelector('.ql-table-tooltip');
+                    if (!tooltip) {
+                        const menu = document.createElement('div');
+                        menu.className =
+                            'ql-table-tooltip bg-white shadow-xl border border-gray-200 rounded-lg p-2 absolute z-[50] grid grid-cols-1 gap-1';
+                        menu.innerHTML = `
+                            <button type="button" class="insert-row-below text-left px-3 py-1 hover:bg-gray-100 rounded text-xs font-bold">➕ Tambah Baris (Bawah)</button>
+                            <button type="button" class="insert-row-above text-left px-3 py-1 hover:bg-gray-100 rounded text-xs font-bold">➕ Tambah Baris (Atas)</button>
+                            <hr class="my-1">
+                            <button type="button" class="insert-col-right text-left px-3 py-1 hover:bg-gray-100 rounded text-xs font-bold">➡️ Tambah Kolom (Kanan)</button>
+                            <button type="button" class="insert-col-left text-left px-3 py-1 hover:bg-gray-100 rounded text-xs font-bold">⬅️ Tambah Kolom (Kiri)</button>
+                            <hr class="my-1">
+                            <button type="button" class="delete-row text-left px-3 py-1 hover:bg-red-50 text-red-600 rounded text-xs font-bold">🗑️ Hapus Baris</button>
+                            <button type="button" class="delete-col text-left px-3 py-1 hover:bg-red-50 text-red-600 rounded text-xs font-bold">🗑️ Hapus Kolom</button>
+                            <button type="button" class="delete-table text-left px-3 py-1 hover:bg-red-600 hover:text-white text-red-600 rounded text-xs font-bold">🔥 Hapus Tabel</button>
+                        `;
+                        document.body.appendChild(menu);
+                        const rect = tableBtn.getBoundingClientRect();
+                        menu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                        menu.style.left = `${rect.left + window.scrollX}px`;
+                        menu.addEventListener('click', (event) => {
+                            if (event.target.classList.contains('insert-row-below')) tableModule
+                                .insertRowBelow();
+                            if (event.target.classList.contains('insert-row-above')) tableModule
+                                .insertRowAbove();
+                            if (event.target.classList.contains('insert-col-right')) tableModule
+                                .insertColumnRight();
+                            if (event.target.classList.contains('insert-col-left')) tableModule
+                                .insertColumnLeft();
+                            if (event.target.classList.contains('delete-row')) tableModule
+                                .deleteRow();
+                            if (event.target.classList.contains('delete-col')) tableModule
+                                .deleteColumn();
+                            if (event.target.classList.contains('delete-table')) tableModule
+                                .deleteTable();
+                            menu.remove();
+                        });
+                        document.addEventListener('mousedown', (clickOut) => {
+                            if (!menu.contains(clickOut.target) && !tableBtn.contains(clickOut
+                                    .target)) menu.remove();
+                        }, {
+                            once: true
+                        });
+                    }
+                }
+            });
+
             const form = document.querySelector("#pageForm");
             form.onsubmit = function() {
-                const isiKonten = document.querySelector("#isi_konten");
-                isiKonten.value = quill.root.innerHTML;
+                document.querySelector("#isi_konten").value = quill.getSemanticHTML();
             };
-
-            quill.getModule("toolbar").addHandler("image", () => {
-                const input = document.createElement("input");
-                input.setAttribute("type", "file");
-                input.setAttribute("accept", "image/*");
-                input.click();
-                input.onchange = () => {
-                    const file = input.files[0];
-                    const formData = new FormData();
-                    formData.append("upload", file);
-                    formData.append("_token", "{{ csrf_token() }}");
-
-                    fetch("{{ route('ckeditor.upload') }}", {
-                            method: "POST",
-                            body: formData,
-                        })
-                        .then((response) => response.json())
-                        .then((result) => {
-                            const range = quill.getSelection();
-                            quill.insertEmbed(range.index, "image", result.url);
-                        })
-                        .catch((error) => console.error("Error:", error));
-                };
-            });
         });
     </script>
+
     <style>
         .ql-toolbar.ql-snow {
             border-top-left-radius: 0.75rem;
@@ -211,33 +232,34 @@
             border-bottom-right-radius: 0.75rem;
             border-color: #e5e7eb;
             font-size: 1rem;
-            background-color: white;
             min-height: 500px;
         }
 
         .ql-editor {
             min-height: 500px;
-            max-height: 800px;
-            overflow-y: auto;
+            max-height: 1000px;
         }
 
-        .ql-video-container {
-            position: relative;
+        .ql-editor img {
+            cursor: pointer;
+            transition: outline 0.1s ease;
+        }
+
+        .ql-editor img:hover {
+            outline: 2px solid #b91c1c;
+        }
+
+        .ql-editor table {
+            border-collapse: collapse;
+            table-layout: fixed;
             width: 100%;
-            max-width: 720px;
-            margin: 2rem auto;
-            aspect-ratio: 16 / 9;
-            border-radius: 1rem;
-            overflow: hidden;
+            margin: 1rem 0;
         }
 
-        .ql-video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
+        .ql-editor table td {
+            border: 1px solid #d1d5db;
+            padding: 8px 12px;
+            min-width: 20px;
         }
     </style>
 </x-app-layout>

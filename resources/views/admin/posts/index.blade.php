@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="text-xl font-bold text-slate-800 tracking-tight">
-                Manajemen Post
+                Kelola Postingan Berita & Informasi
             </h2>
             <a href="{{ route('posts.create') }}"
                 class="inline-flex items-center bg-red-700 hover:bg-red-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md shadow-red-200">
@@ -33,7 +33,6 @@
                         <tbody class="divide-y divide-slate-100">
                             @foreach ($posts as $post)
                                 <tr class="hover:bg-slate-50/50 transition-colors group">
-                                    {{-- THUMBNAIL --}}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex justify-center">
                                             @if ($post->gambar_thumbnail)
@@ -53,7 +52,6 @@
                                         </div>
                                     </td>
 
-                                    {{-- JUDUL --}}
                                     <td class="px-6 py-4">
                                         <div class="max-w-xs md:max-w-md">
                                             <p
@@ -65,7 +63,6 @@
                                         </div>
                                     </td>
 
-                                    {{-- KATEGORI --}}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 uppercase">
@@ -73,7 +70,6 @@
                                         </span>
                                     </td>
 
-                                    {{-- STATUS --}}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if ($post->status == 'publish')
                                             <span class="inline-flex items-center text-xs font-medium text-green-600">
@@ -89,7 +85,6 @@
                                         @endif
                                     </td>
 
-                                    {{-- VIEW --}}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center text-slate-500">
                                             <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none"
@@ -104,7 +99,6 @@
                                         </div>
                                     </td>
 
-                                    {{-- AKSI --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
                                         <div class="flex justify-end items-center gap-3">
                                             <a href="{{ route('posts.edit', $post) }}"

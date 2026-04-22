@@ -49,43 +49,22 @@
                 {{ $galleries->links() }}
             </div>
         @else
-            <div class="relative flex items-center justify-center py-32 px-6 overflow-hidden">
-                <div
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-red-50 rounded-full blur-3xl opacity-60">
+            <div class="flex flex-col items-center justify-center py-24 px-6">
+                <div class="mb-8 p-6 bg-slate-50 rounded-full border border-slate-100">
+                    <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
                 </div>
 
-                <div class="relative flex flex-col items-center max-w-lg w-full text-center">
-                    <div class="relative mb-10">
-                        <div class="absolute inset-0 bg-white rounded-3xl rotate-6 border border-slate-100 shadow-sm">
-                        </div>
-                        <div
-                            class="relative bg-gradient-to-br from-white to-slate-50 p-7 rounded-3xl shadow-xl border border-white/60">
-                            <svg class="w-14 h-14 text-red-700/70" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div
-                            class="absolute -bottom-2 -right-2 w-6 h-6 bg-red-600 rounded-lg shadow-lg flex items-center justify-center">
-                            <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                        </div>
-                    </div>
-
-                    <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight mb-4">
-                        Galeri <span class="text-red-700">Masih Kosong</span>
+                <div class="max-w-md text-center">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-2">
+                        Galeri Belum Tersedia
                     </h3>
-
-                    <p class="text-slate-500 leading-relaxed mb-10 text-base md:text-lg font-medium opacity-80">
-                        Belum ada dokumentasi kegiatan yang ditemukan. Kami akan segera memperbarui koleksi foto untuk
-                        Anda.
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed">
+                        Saat ini belum ada dokumentasi kegiatan yang diunggah. Silakan cek kembali beberapa saat lagi.
                     </p>
-
-                    <div class="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-                        <span class="h-px w-8 bg-slate-200"></span>
-                        <span>Coming Soon</span>
-                        <span class="h-px w-8 bg-slate-200"></span>
-                    </div>
                 </div>
             </div>
         @endif

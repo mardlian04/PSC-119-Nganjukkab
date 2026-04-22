@@ -19,28 +19,30 @@
             </header>
 
             @php
-                $kategoriList = [
-                    'media_cetak' => 'Media Cetak',
-                    'media_publikasi' => 'Media Publikasi',
-                    'infografis' => 'Infografis',
+                $kategoriGroups = [
+                    'media_cetak' => ['label' => 'Media Cetak', 'data' => $media_cetak, 'pageName' => 'cetak'],
+                    'media_publikasi' => [
+                        'label' => 'Media Publikasi',
+                        'data' => $media_publikasi,
+                        'pageName' => 'publikasi',
+                    ],
+                    'infografis' => ['label' => 'Infografis', 'data' => $infografis, 'pageName' => 'infografis'],
                 ];
                 $hasContent = false;
             @endphp
 
-            @foreach ($kategoriList as $key => $label)
-                @php
-                    $items = $media->where('kategori', $key);
-                @endphp
+            @foreach ($kategoriGroups as $key => $group)
+                @php $items = $group['data']; @endphp
 
                 @if ($items->count() > 0)
                     @php $hasContent = true; @endphp
-                    <section class="mb-16">
+                    <section class="mb-20">
                         <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                             <span class="w-2 h-8 bg-red-600 rounded-full"></span>
-                            {{ $label }}
+                            {{ $group['label'] }}
                         </h2>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                             @foreach ($items as $m)
                                 <div
                                     class="group bg-white rounded-2xl border border-slate-200 p-3 hover:shadow-xl transition-all flex flex-col">
@@ -77,13 +79,9 @@
                                         </div>
                                     </div>
 
-                                    <h3 class="text-sm font-bold text-slate-800 mb-2 line-clamp-2">
-                                        {{ $m->judul_file }}
+                                    <h3 class="text-sm font-bold text-slate-800 mb-2 line-clamp-2">{{ $m->judul_file }}
                                     </h3>
-
-                                    <p class="text-xs text-slate-500 mb-4 line-clamp-2">
-                                        {{ $m->keterangan ?? '-' }}
-                                    </p>
+                                    <p class="text-xs text-slate-500 mb-4 line-clamp-2">{{ $m->keterangan ?? '-' }}</p>
 
                                     <div class="mt-auto space-y-2">
                                         @if ($m->tipe_file == 'pdf')
@@ -99,7 +97,6 @@
                                                 </svg>
                                                 Lihat Dokumen
                                             </a>
-
                                             <a href="{{ asset('storage/' . $m->path_file) }}" download
                                                 class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -115,65 +112,47 @@
                                 </div>
                             @endforeach
                         </div>
+
+                        <div class="mt-8">
+                            {{ $items->appends(request()->except($group['pageName']))->links() }}
+                        </div>
                     </section>
                 @endif
             @endforeach
 
             @if (!$hasContent)
-                <div class="flex items-center justify-center py-20 px-4">
-                    <div class="relative max-w-lg w-full">
-                        <div
-                            class="absolute inset-0 bg-gradient-to-r from-red-50 to-slate-50 transform skew-y-2 rounded-3xl -z-10 opacity-50">
-                        </div>
+                <div
+                    class="flex flex-col items-center justify-center py-20 px-6 border-2 border-dashed border-slate-100 rounded-3xl">
+                    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-red-600/70" fill="none" stroke="currentColor" stroke-width="1.5"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                    </div>
 
-                        <div
-                            class="bg-white/80 backdrop-blur-sm border border-white rounded-3xl shadow-xl p-10 flex flex-col items-center text-center">
-                            <div class="relative mb-8">
-                                <div class="absolute inset-0 bg-red-100 rounded-full blur-2xl opacity-40 animate-pulse">
-                                </div>
-                                <div
-                                    class="relative bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl shadow-sm border border-slate-100">
-                                    <svg class="w-16 h-16 text-red-700/80" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
-                                Media <span class="text-red-700">Belum Tersedia</span>
-                            </h3>
-
-                            <p class="text-slate-500 leading-relaxed max-w-xs mx-auto mb-8 text-sm md:text-base">
-                                Kami sedang menyiapkan konten promosi kesehatan terbaik untuk Anda. Silakan periksa
-                                kembali beberapa saat lagi.
-                            </p>
-
-                            <div class="flex gap-3">
-                                <div class="h-1.5 w-8 rounded-full bg-red-600/20"></div>
-                                <div class="h-1.5 w-1.5 rounded-full bg-red-600/20"></div>
-                                <div class="h-1.5 w-1.5 rounded-full bg-red-600/20"></div>
-                            </div>
-                        </div>
+                    <div class="text-center max-w-sm">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">
+                            Media Belum Tersedia
+                        </h3>
+                        <p class="text-slate-500 text-sm md:text-base leading-relaxed">
+                            Kami sedang menyiapkan konten promosi kesehatan terbaik untuk Anda.
+                        </p>
                     </div>
                 </div>
             @endif
-
         </div>
     </main>
 
     <div id="imageModal"
         class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex-col items-center justify-center z-[9999] p-4 transition-all duration-300"
         onclick="closeModalOutside(event)">
-
         <button onclick="closeModal()"
             class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[10000]">
             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-
         <div class="relative max-w-5xl w-full flex flex-col items-center justify-center"
             onclick="event.stopPropagation()">
             <img id="modalImage" class="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl">
@@ -202,15 +181,10 @@
         }
 
         function closeModalOutside(event) {
-            if (event.target.id === 'imageModal') {
-                closeModal();
-            }
+            if (event.target.id === 'imageModal') closeModal();
         }
-
         document.addEventListener('keydown', function(e) {
-            if (e.key === "Escape") {
-                closeModal();
-            }
+            if (e.key === "Escape") closeModal();
         });
     </script>
 </x-front-layout>
